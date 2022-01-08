@@ -1,7 +1,12 @@
 package com.kumarsudarshan.reactiveprogrammingtutorial.services;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class FluxAndMonoServiceTest {
 
@@ -210,10 +215,39 @@ class FluxAndMonoServiceTest {
 
     @Test
     void fruitsFluxOnErrorMap() {
-        var fruitsFluxOnErrorMap = fluxAndMonoService.fruitsFluxOnErrorMap();
+        var fruitsFluxOnErrorMap = fluxAndMonoService.fruitsFluxOnErrorMap().log();
         StepVerifier.create(fruitsFluxOnErrorMap)
                 .expectNext("MANGO")
                 .expectError(IllegalStateException.class)
                 .verify();
+    }
+
+    @Test
+    void fruitsFluxDoOnError() {
+        var fruitsFluxDoOnError = fluxAndMonoService.fruitsFluxDoOnError();
+        StepVerifier.create(fruitsFluxDoOnError)
+                .expectNext("MANGO")
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    public void testStreamBatchesResults() {
+        Flux<String> stream = Flux.just("1", "2", "3", "4", "5");
+        Mono<List<Integer>> s = stream.map(str -> Integer.parseInt(str))
+                .collectList();
+
+        final AtomicInteger batchCount = new AtomicInteger();
+        final AtomicInteger count = new AtomicInteger();
+        s.subscribe(is -> {
+            batchCount.incrementAndGet();
+            for (int i : is) {
+                count.addAndGet(i);
+            }
+        });
+
+//        assertThat("batchCount is 3", batchCount.get(), is(1));
+//        assertThat("count is 15", count.get(), is(15));
+        System.out.println("jjk");
     }
 }

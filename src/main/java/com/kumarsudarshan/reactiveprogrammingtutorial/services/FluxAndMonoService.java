@@ -260,4 +260,17 @@ public class FluxAndMonoService {
                     return new IllegalStateException("From onErrorMap");
                 });
     }
+
+    // use Do On error
+    public Flux<String> fruitsFluxDoOnError() {
+        return Flux.just("mango", "banana", "orange")
+                .map(s -> {
+                    if (s.equalsIgnoreCase("banana"))
+                        throw new RuntimeException("Exception Occurred: " + s);
+                    return s.toUpperCase();
+                })
+                .doOnError(throwable -> {
+                    System.out.println("Throwable = " + throwable);
+                });
+    }
 }
